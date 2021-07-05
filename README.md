@@ -1,2 +1,2 @@
-# exchange_ws
-交易所 websocket版
+# goex_ws_extend
+GOEX ws的扩展

@@ -1,7 +1,6 @@
 package zb
 
 import (
-	"fmt"
 	"github.com/nntaoli-project/goex"
 	"log"
 	"os"
@@ -14,8 +13,8 @@ func TestZb(t *testing.T) {
 	ws := NewSpotWs()
 	_ = ws.SubscribeTicker(goex.NewCurrencyPair2("USDT_QC"))
 	go func() {
-		ws.TickerCallback(func(t *goex.Ticker) {
-			fmt.Println(t.Last)
+		ws.TickerCallback(func(tk *goex.Ticker) {
+			t.Log(tk.Last)
 		})
 	}()
 	WaitQuit()
