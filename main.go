@@ -7,6 +7,7 @@ import (
 	"github.com/nntaoli-project/goex"
 	"github.com/nntaoli-project/goex/builder"
 	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -14,7 +15,6 @@ import (
 const (
 	ak       = "2f6df565-f1ce-4bf8-b0ae-a352a144659c" // app key
 	sk       = "8010662a-dd23-48b0-aaa8-0ce2fbb9147a" // secret key
-	proxyUrl = "http://127.0.0.1:1080"                // 代理 url
 	currency = "USDT_QC"                              // 交易对
 	timeout  = 60                                     // 订单挂起超时时间
 )
@@ -27,18 +27,24 @@ const (
 	OrderEnd     = "end"     // 订单已结束
 )
 
-var RedisDefault = db.ConfigRedis{Addr: "192.168.184.128", Port: 6379, Auth: "", SelectDB: 0}
+var RedisDefault = db.ConfigRedis{Addr: "172.22.67.40", Port: 6379, Auth: "", SelectDB: 0}
 var Exchange goex.API
+var proxyUrl string
 var Pair = goex.NewCurrencyPair2(currency)
 var ctx = context.Background()
 
 func main() {
-
-	Exchange = extend.New(
-		builder.DefaultAPIBuilder.HttpProxy(proxyUrl).GetHttpClient(),
-		ak,
-		sk,
-	)
+	if proxyUrl == "" {
+		proxyUrl = os.Getenv("http_proxy")
+		if proxyUrl == "" {
+			proxyUrl = os.Getenv("https_proxy")
+		}
+	}
+	if proxyUrl == "" {
+		Exchange = extend.New(builder.DefaultAPIBuilder.GetHttpClient(), ak, sk)
+	} else {
+		Exchange = extend.New(builder.DefaultAPIBuilder.HttpProxy(proxyUrl).GetHttpClient(), ak, sk)
+	}
 
 	if err := db.ConnectRedis(&RedisDefault); err != nil {
 		log.Fatalf("Connect Redis Fail: %s", err.Error())
